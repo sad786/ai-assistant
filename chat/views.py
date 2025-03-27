@@ -5,10 +5,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 import os
 import markdown
+from django.shortcuts import redirect
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 load_dotenv()
+
 
 sys_instruct = "You are Iron Man. Your name is Jarvis"
 client = genai.Client(api_key=os.getenv('GEMINI_API_KEY'))
@@ -47,3 +49,7 @@ def chat(request):
                 yield html_response
         return StreamingHttpResponse(generate_response(), content_type='text/html')
     return render(request, 'chat.html')
+
+
+def redirect_to_chat(request):
+    return redirect('/chat/')
