@@ -1,10 +1,9 @@
 from django.contrib import admin
 from django.urls import path, include
-
-from chat.views import redirect_to_chat
+from django.views.generic import RedirectView
 
 urlpatterns = [
     #path('admin/', admin.site.urls),
-    path('chat/', include('chat.urls')),
-    path('', redirect_to_chat),  # Use the custom view for redirection
+    path('chat/', include('chat.urls')),  # Include the chat app URLs
+    path('', RedirectView.as_view(url='/chat/')),  # Redirect homepage to /chat/
 ]
