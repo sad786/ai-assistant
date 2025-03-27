@@ -4,5 +4,5 @@
       "python manage.py collectstatic --noinput"
     ]
   },
-  "start": "gunicorn ai_assistant.wsgi --log-file -"
+  "start": "gunicorn ai_assistant.wsgi:application --log-file -"
 }
