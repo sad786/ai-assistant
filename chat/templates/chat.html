@@ -1,0 +1,61 @@
+{% extends 'base.html'%}
+
+{% block content %}
+<div class="messages" id="messages"></div>
+<input type="text" id="user-input" placeholder="Type your message here..." />
+<button type="button" class="btn btn-primary" onCLick="sendMessage()" onkeypress="keyPressed(event)" style="margin-top:5px;">Send</button>
+
+<script>
+    const messagesContainer = document.getElementById('messages');
+    function sendMessage() {
+        const userInput = document.getElementById('user-input').value;
+        if (!userInput.trim()) return;
+
+        // Display user message
+        const userMessage = document.createElement('div');
+        userMessage.className = 'message user';
+        userMessage.textContent = userInput;
+        userMessage.textColor = 'blue';
+        messagesContainer.appendChild(userMessage);
+
+        // Clear input
+        document.getElementById('user-input').value = '';
+
+        // Fetch bot response
+        fetch('/chat/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ message: userInput })
+        })
+        .then(response => response.body.getReader())
+        .then(reader => {
+            const decoder = new TextDecoder();
+            const botMessage = document.createElement('div');
+            botMessage.className = 'message bot';
+            messagesContainer.appendChild(botMessage);
+
+            function readStream() {
+                reader.read().then(({ done, value }) => {
+                    if (done) return;
+                    // Insert HTML into the bot message
+                    botMessage.innerHTML += decoder.decode(value, { stream: true });
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    readStream();
+                });
+            }
+            readStream();
+        });
+    }
+
+    // Listen for the Enter key press
+    document.getElementById('user-input').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Prevent the default behavior of adding a newline
+            sendMessage(); // Call the sendMessage function
+        }
+    });
+</script>
+{% endblock %}
